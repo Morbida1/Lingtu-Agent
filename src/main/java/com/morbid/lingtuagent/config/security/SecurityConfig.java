@@ -1,5 +1,6 @@
 package com.morbid.lingtuagent.config.security;
 
+import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +27,7 @@ public class SecurityConfig {
                         (SessionCreationPolicy.STATELESS))
                 // 2. 路径授权规则
                 .authorizeHttpRequests(auth -> auth
+                        .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
                         // ★ 白名单：必须放行的路径 ★
                         .requestMatchers(
                                 "/auth/**",               // 登录注册
@@ -33,6 +35,7 @@ public class SecurityConfig {
                                 "/error"                  // 允许错误页面（便于调试）
                         ).permitAll()
                         .anyRequest().authenticated()
+
                 )
 
                         // 将 JWT 过滤器放在 UsernamePasswordAuthenticationFilter 之前

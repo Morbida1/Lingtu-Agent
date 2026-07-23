@@ -143,15 +143,46 @@ CREATE TABLE IF NOT EXISTS chat_message (
                                             INDEX idx_session_id (session_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='聊天消息表';
 -- 知识库表
-CREATE TABLE IF NOT EXISTS knowledge_base (
-                                              id BIGINT AUTO_INCREMENT PRIMARY KEY,
-                                              user_id BIGINT COMMENT '用户ID',
-                                              title VARCHAR(200) COMMENT '标题',
-                                              file_name VARCHAR(200) COMMENT '文件名',
-                                              file_type VARCHAR(50) COMMENT '文件类型',
-                                              content LONGTEXT COMMENT '内容',
-                                              create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                                              update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                                              deleted TINYINT DEFAULT 0 COMMENT '逻辑删除',
-                                              INDEX idx_user_id (user_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='知识库表';
+CREATE TABLE IF NOT EXISTS `knowledge_doc` (
+                                                    `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+                                                    `user_id` BIGINT NOT NULL COMMENT '用户ID',
+                                                    `title` VARCHAR(255) NOT NULL COMMENT '文档标题',
+                                                    `file_type` VARCHAR(20) NOT NULL COMMENT '文件类型：PDF/WORD/MARKDOWN',
+                                                    `file_path` VARCHAR(500) NOT NULL COMMENT '文件存储路径',
+                                                    `content` TEXT COMMENT '提取的文本内容',
+                                                    `chunk_count` INT DEFAULT 0 COMMENT '分块数量',
+                                                    `status` TINYINT DEFAULT 0 COMMENT '状态：0-处理中 1-已入库 2-失败',
+                                                    `error_msg` VARCHAR(500) COMMENT '错误信息',
+                                                    `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                                                    `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                                                    `deleted` TINYINT DEFAULT 0 COMMENT '逻辑删除',
+                                                    INDEX `idx_user_id` (`user_id`),
+                                                    INDEX `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='知识库文档表';
+# CREATE TABLE IF NOT EXISTS knowledge_base (
+#                                               id BIGINT AUTO_INCREMENT PRIMARY KEY,
+#                                               user_id BIGINT COMMENT '用户ID',
+#                                               title VARCHAR(200) COMMENT '标题',
+#                                               file_name VARCHAR(200) COMMENT '文件名',
+#                                               file_type VARCHAR(50) COMMENT '文件类型',
+#                                               content LONGTEXT COMMENT '内容',
+#                                               create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+#                                               update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+#                                               deleted TINYINT DEFAULT 0 COMMENT '逻辑删除',
+#                                               INDEX idx_user_id (user_id)
+# ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='知识库表';
+#  DROP TABLE IF EXISTS knowledge_document;
+-- Prompt模板表
+CREATE TABLE IF NOT EXISTS `prompt_template` (
+                                                 `id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+                                                 `name` VARCHAR(100) NOT NULL COMMENT '模板名称',
+                                                 `category` VARCHAR(50) COMMENT '场景分类：chat/planner/rag',
+                                                 `template` TEXT NOT NULL COMMENT 'Prompt模板内容',
+                                                 `variables` JSON COMMENT '变量列表（JSON数组）',
+                                                 `is_active` TINYINT DEFAULT 1 COMMENT '是否启用',
+                                                 `deleted` TINYINT DEFAULT 0 COMMENT '逻辑删除',
+                                                 `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                                                 `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                                                 INDEX `idx_category` (`category`),
+                                                 INDEX `idx_is_active` (`is_active`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Prompt模板表';
