@@ -16,4 +16,8 @@ public interface HotelService extends IService<Hotel> {
     List<HotelVO> listAllHotel();
     IPage<HotelVO> page(int pageNum, int pageSize,String keyword);
     List<HotelVO> listByCityId(Long cityId);
+
+    List<HotelVO> listDeleted();
+    void restore(Long id);
+    void physicalDelete(Long id);
 }

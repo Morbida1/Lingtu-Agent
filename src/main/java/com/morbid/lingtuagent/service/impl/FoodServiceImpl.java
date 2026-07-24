@@ -1,6 +1,7 @@
 package com.morbid.lingtuagent.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -15,6 +16,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,9 +41,15 @@ public class FoodServiceImpl extends ServiceImpl<FoodMapper, Food> implements Fo
     }
     @Override
     public void deleteFood(Long id) {
-        if (!this.removeById(id)) {
+        Food food = this.getById(id);
+        if (food == null) {
             throw new BusinessException("美食不存在");
         }
+        LambdaUpdateWrapper<Food> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(Food::getId, id)
+               .set(Food::getDeleted, 1)
+               .set(Food::getDeleteTime, LocalDateTime.now());
+        this.update(wrapper);
     }
     @Override
     public FoodVO getFoodVOById(Long id) {
@@ -87,5 +95,26 @@ public class FoodServiceImpl extends ServiceImpl<FoodMapper, Food> implements Fo
         FoodVO vo = new FoodVO();
         BeanUtils.copyProperties(food, vo);
         return vo;
+    }
+
+    @Override
+    public List<FoodVO> listDeleted() {
+        return baseMapper.selectDeleted().stream()
+                .map(this::convertToVO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void restore(Long id) {
+        if (baseMapper.restoreById(id) == 0) {
+            throw new BusinessException("恢复失败");
+        }
+    }
+
+    @Override
+    public void physicalDelete(Long id) {
+        if (baseMapper.physicalDeleteById(id) == 0) {
+            throw new BusinessException("物理删除失败，数据不存在");
+        }
     }
 }

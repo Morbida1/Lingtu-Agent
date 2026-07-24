@@ -29,6 +29,24 @@ public class ItineraryController {
         itineraryService.deleteItinerary(id);
         return Result.success();
     }
+
+    @GetMapping("/deleted")
+    public Result<List<ItineraryVO>> listDeleted() {
+        return Result.success(itineraryService.listDeleted());
+    }
+
+    @PutMapping("/{id}/restore")
+    public Result<Void> restore(@PathVariable Long id) {
+        itineraryService.restore(id);
+        return Result.success();
+    }
+
+    @DeleteMapping("/{id}/physical")
+    public Result<Void> physicalDelete(@PathVariable Long id) {
+        itineraryService.physicalDelete(id);
+        return Result.success();
+    }
+
     @GetMapping("/{id}")
     public Result<ItineraryVO> get(@PathVariable Long id) {
         return Result.success(itineraryService.getItineraryById(id));

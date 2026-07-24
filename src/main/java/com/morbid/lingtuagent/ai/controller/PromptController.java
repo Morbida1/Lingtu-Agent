@@ -31,8 +31,9 @@ public class PromptController {
         return Result.success(promptService.create(template));
     }
 
-    @PutMapping
-    public Result<PromptTemplate> update(@RequestBody PromptTemplate template) {
+    @PutMapping("/{id}")
+    public Result<PromptTemplate> update(@PathVariable Long id, @RequestBody PromptTemplate template) {
+        template.setId(id);
         return Result.success(promptService.update(template));
     }
 

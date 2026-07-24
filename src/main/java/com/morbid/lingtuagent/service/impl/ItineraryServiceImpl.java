@@ -1,6 +1,7 @@
 package com.morbid.lingtuagent.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,9 +64,15 @@ public class ItineraryServiceImpl extends ServiceImpl<ItineraryMapper, Itinerary
     @Override
     @Transactional
     public void deleteItinerary(Long id) {
-        if (!removeById(id)) {
-            throw new BusinessException( "行程不存在");
+        Itinerary itinerary = this.getById(id);
+        if (itinerary == null) {
+            throw new BusinessException("行程不存在");
         }
+        LambdaUpdateWrapper<Itinerary> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(Itinerary::getId, id)
+               .set(Itinerary::getDeleted, 1)
+               .set(Itinerary::getDeleteTime, LocalDateTime.now());
+        this.update(wrapper);
         deleteDaysAndItems(id);
     }
 
@@ -179,5 +187,26 @@ public class ItineraryServiceImpl extends ServiceImpl<ItineraryMapper, Itinerary
         ItineraryVO vo = new ItineraryVO();
         BeanUtils.copyProperties(itinerary, vo);
         return vo;
+    }
+
+    @Override
+    public List<ItineraryVO> listDeleted() {
+        return baseMapper.selectDeleted().stream()
+                .map(this::convertToVO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void restore(Long id) {
+        if (baseMapper.restoreById(id) == 0) {
+            throw new BusinessException("恢复失败");
+        }
+    }
+
+    @Override
+    public void physicalDelete(Long id) {
+        if (baseMapper.physicalDeleteById(id) == 0) {
+            throw new BusinessException("物理删除失败，数据不存在");
+        }
     }
 }

@@ -22,6 +22,9 @@ public class Food {
 
     @TableLogic(value = "0", delval = "1") // 逻辑删除标记
     private Integer deleted;
+
+    private LocalDateTime deleteTime;
+
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
     @TableField(fill = FieldFill.INSERT_UPDATE)

@@ -11,8 +11,8 @@ public class UserVO {
     private String nickname;
     private String email;
     private Integer status;
-    // 统一日期格式
+    private String role;
+    
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime createTime;
-        // 不包含 password 字段
 }

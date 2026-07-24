@@ -26,9 +26,11 @@ public class User {
     private Integer status; // 0-禁用，1-启用
     
     @TableLogic
-    private Integer deleted; // 逻辑删除标记
-    
-    @TableField(fill = FieldFill.INSERT) // 插入时自动填充创建时间
+    private Integer deleted;
+
+    private LocalDateTime deleteTime;
+
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
     @TableField(fill = FieldFill.INSERT_UPDATE) // 插入和更新时自动填充更新时间
     private LocalDateTime updateTime;

@@ -19,6 +19,8 @@ public class City {
     @TableLogic(value = "0", delval = "1")
     private Integer deleted;
 
+    private LocalDateTime deleteTime;
+
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
     @TableField(fill = FieldFill.INSERT_UPDATE)

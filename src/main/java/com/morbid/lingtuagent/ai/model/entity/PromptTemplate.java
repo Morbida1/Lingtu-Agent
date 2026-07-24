@@ -14,6 +14,11 @@ public class PromptTemplate {
     private String template;
     private String variables;
     private Boolean isActive;
+    @TableField("create_time")
     private LocalDateTime createdAt;
+    @TableField("update_time")
     private LocalDateTime updatedAt;
+    @TableLogic
+    @TableField("deleted")
+    private Integer deleted;
 }

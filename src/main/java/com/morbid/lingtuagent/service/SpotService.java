@@ -15,5 +15,9 @@ public interface SpotService extends IService<Spot> {
     SpotVO getSpotVOById(Long id);
     List<SpotVO> listAllSpot();
     IPage<SpotVO> page(int pageNum, int pageSize, String keyword);
-    List<SpotVO> listByCityId(Long cityId);  // 按城市查景点
+    List<SpotVO> listByCityId(Long cityId);
+
+    List<SpotVO> listDeleted();
+    void restore(Long id);
+    void physicalDelete(Long id);
 }

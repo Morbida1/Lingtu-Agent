@@ -29,6 +29,24 @@ public class FoodController {
         foodService.deleteFood(id);
         return Result.success();
     }
+
+    @GetMapping("/deleted")
+    public Result<List<FoodVO>> listDeleted() {
+        return Result.success(foodService.listDeleted());
+    }
+
+    @PutMapping("/{id}/restore")
+    public Result<Void> restore(@PathVariable Long id) {
+        foodService.restore(id);
+        return Result.success();
+    }
+
+    @DeleteMapping("/{id}/physical")
+    public Result<Void> physicalDelete(@PathVariable Long id) {
+        foodService.physicalDelete(id);
+        return Result.success();
+    }
+
     @GetMapping("/{id}")
     public Result<FoodVO> get(@PathVariable Long id) {
         return Result.success(foodService.getFoodVOById(id));

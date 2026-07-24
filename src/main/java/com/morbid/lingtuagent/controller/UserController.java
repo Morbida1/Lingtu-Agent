@@ -47,6 +47,23 @@ public class UserController {
         return Result.success();
     }
 
+    @GetMapping("/deleted")
+    public Result<List<UserVO>> listDeleted() {
+        return Result.success(userService.listDeleted());
+    }
+
+    @PutMapping("/{id}/restore")
+    public Result<Void> restore(@PathVariable Long id) {
+        userService.restore(id);
+        return Result.success();
+    }
+
+    @DeleteMapping("/{id}/physical")
+    public Result<Void> physicalDelete(@PathVariable Long id) {
+        userService.physicalDelete(id);
+        return Result.success();
+    }
+
     @GetMapping("/{id}")
     public Result<UserVO> getUser(@PathVariable Long id) {
         return Result.success(userService.getUserVOById(id));
@@ -113,6 +130,7 @@ public class UserController {
         vo.setEmail(user.getEmail());
         vo.setStatus(user.getStatus());
         vo.setCreateTime(user.getCreateTime());
+        vo.setRole(user.getRole());
         return vo;
     }
 

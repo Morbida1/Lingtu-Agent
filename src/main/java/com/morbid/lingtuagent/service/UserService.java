@@ -16,4 +16,8 @@ public interface UserService extends IService<User> {
     List<UserVO> listAllUser();
     IPage<UserVO> page(int pageNum, int pageSize, String keyword);
     User findByUsername(String username);
+
+    List<UserVO> listDeleted();
+    void restore(Long id);
+    void physicalDelete(Long id);
 }

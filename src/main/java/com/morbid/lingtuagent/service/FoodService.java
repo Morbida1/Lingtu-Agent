@@ -17,4 +17,8 @@ public interface FoodService extends IService<Food> {
     IPage<FoodVO> page(int pageNum, int pageSize, String keyword);
     List<FoodVO> listByCityId(Long cityId);
     List<FoodVO> listByCategory(String category);
+
+    List<FoodVO> listDeleted();
+    void restore(Long id);
+    void physicalDelete(Long id);
 }

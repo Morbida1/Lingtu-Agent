@@ -29,6 +29,24 @@ public class CityController {
         cityService.deleteCity(id);
         return Result.success();
     }
+
+    @GetMapping("/deleted")
+    public Result<List<CityVO>> listDeleted() {
+        return Result.success(cityService.listDeleted());
+    }
+
+    @PutMapping("/{id}/restore")
+    public Result<Void> restore(@PathVariable Long id) {
+        cityService.restore(id);
+        return Result.success();
+    }
+
+    @DeleteMapping("/{id}/physical")
+    public Result<Void> physicalDelete(@PathVariable Long id) {
+        cityService.physicalDelete(id);
+        return Result.success();
+    }
+
     @GetMapping("/{id}")
     public Result<CityVO> getById(@PathVariable Long id) {
         return Result.success(cityService.getCityVOById(id));

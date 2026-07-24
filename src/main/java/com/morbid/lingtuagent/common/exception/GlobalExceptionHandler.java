@@ -8,6 +8,8 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -26,6 +28,17 @@ public class GlobalExceptionHandler {
     public Result<Void> handleBusinessException(BusinessException e) {
         log.error("业务异常：{}", e.getMessage());
         return Result.error(e.getCode(), e.getMessage());
+    }
+
+    //处理认证异常（用户名密码错误等）
+    @ExceptionHandler(AuthenticationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public Result<Void> handleAuthenticationException(AuthenticationException e) {
+        log.warn("认证失败：{}", e.getMessage());
+        if (e instanceof BadCredentialsException) {
+            return Result.error(ResultCode.UNAUTHORIZED.getCode(), "用户名或密码错误");
+        }
+        return Result.error(ResultCode.UNAUTHORIZED.getCode(), "认证失败：" + e.getMessage());
     }
     //处理 @Valid 校验异常（用于 RequestBody）
     @Valid

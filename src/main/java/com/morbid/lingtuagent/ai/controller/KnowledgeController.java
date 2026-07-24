@@ -3,6 +3,8 @@ package com.morbid.lingtuagent.ai.controller;
 import com.morbid.lingtuagent.ai.model.vo.KnowledgeDocVO;
 import com.morbid.lingtuagent.ai.service.KnowledgeService;
 import com.morbid.lingtuagent.common.Result;
+import com.morbid.lingtuagent.common.ResultCode;
+import com.morbid.lingtuagent.common.exception.BusinessException;
 import com.morbid.lingtuagent.model.entity.User;
 import com.morbid.lingtuagent.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +44,12 @@ public class KnowledgeController {
         return Result.success(knowledgeService.queryKnowledge(userId, question));
     }
 
+    @GetMapping("/{docId}")
+    public Result<KnowledgeDocVO> getDocument(@PathVariable Long docId) {
+        Long userId = getCurrentUserId();
+        return Result.success(knowledgeService.getDoc(userId, docId));
+    }
+
     @DeleteMapping("/{docId}")
     public Result<Void> deleteDocument(@PathVariable Long docId) {
         Long userId = getCurrentUserId();
@@ -51,14 +59,14 @@ public class KnowledgeController {
 
     private Long getCurrentUserId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Object principal = auth.getPrincipal();
-        String username;
-        if (principal instanceof UserDetails) {
-            username = ((UserDetails) principal).getUsername();
-        } else {
-            username = principal.toString();
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new BusinessException(ResultCode.UNAUTHORIZED);
         }
-        User user = userService.findByUsername(username);
+        UserDetails userDetails = (UserDetails) auth.getPrincipal();
+        User user = userService.findByUsername(userDetails.getUsername());
+        if (user == null) {
+            throw new BusinessException(ResultCode.UNAUTHORIZED);
+        }
         return user.getId();
     }
 }

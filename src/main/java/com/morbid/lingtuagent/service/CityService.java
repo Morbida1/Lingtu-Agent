@@ -15,4 +15,8 @@ public interface CityService extends IService<City> {
     CityVO getCityVOById(Long id);
     List<CityVO> listAllCity();
     IPage<CityVO> page(int pageNum, int pageSize, String keyword);
+
+    List<CityVO> listDeleted();
+    void restore(Long id);
+    void physicalDelete(Long id);
 }

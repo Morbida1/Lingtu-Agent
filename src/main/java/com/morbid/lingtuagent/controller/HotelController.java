@@ -29,6 +29,24 @@ public class HotelController {
         hotelService.deleteHotel(id);
         return Result.success();
     }
+
+    @GetMapping("/deleted")
+    public Result<List<HotelVO>> listDeleted() {
+        return Result.success(hotelService.listDeleted());
+    }
+
+    @PutMapping("/{id}/restore")
+    public Result<Void> restore(@PathVariable Long id) {
+        hotelService.restore(id);
+        return Result.success();
+    }
+
+    @DeleteMapping("/{id}/physical")
+    public Result<Void> physicalDelete(@PathVariable Long id) {
+        hotelService.physicalDelete(id);
+        return Result.success();
+    }
+
     @GetMapping("/{id}")
     public Result<HotelVO> get(@PathVariable Long id) {
         return Result.success(hotelService.getHotelVOById(id));

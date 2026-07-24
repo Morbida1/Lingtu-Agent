@@ -1,6 +1,7 @@
 package com.morbid.lingtuagent.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -15,6 +16,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,9 +44,15 @@ public class SpotServiceImpl extends ServiceImpl<SpotMapper, Spot> implements Sp
 
     @Override
     public void deleteSpot(Long id) {
-        if (!this.removeById(id)) {
-            throw new BusinessException("景点不存在或删除失败");
+        Spot spot = this.getById(id);
+        if (spot == null) {
+            throw new BusinessException("景点不存在");
         }
+        LambdaUpdateWrapper<Spot> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(Spot::getId, id)
+               .set(Spot::getDeleted, 1)
+               .set(Spot::getDeleteTime, LocalDateTime.now());
+        this.update(wrapper);
     }
 
     @Override
@@ -83,5 +91,26 @@ public class SpotServiceImpl extends ServiceImpl<SpotMapper, Spot> implements Sp
         SpotVO vo = new SpotVO();
         BeanUtils.copyProperties(spot, vo);
         return vo;
+    }
+
+    @Override
+    public List<SpotVO> listDeleted() {
+        return baseMapper.selectDeleted().stream()
+                .map(this::convertToVO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void restore(Long id) {
+        if (baseMapper.restoreById(id) == 0) {
+            throw new BusinessException("恢复失败");
+        }
+    }
+
+    @Override
+    public void physicalDelete(Long id) {
+        if (baseMapper.physicalDeleteById(id) == 0) {
+            throw new BusinessException("物理删除失败，数据不存在");
+        }
     }
 }

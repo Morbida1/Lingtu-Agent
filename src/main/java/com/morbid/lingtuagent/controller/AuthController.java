@@ -47,6 +47,7 @@ public class AuthController {
         user.setNickname(request.getNickname());
         user.setEmail(request.getEmail());
         user.setStatus(1); // 默认启用
+        user.setRole("user"); // 默认普通用户
         user.setCreateTime(LocalDateTime.now());
         user.setUpdateTime(LocalDateTime.now());
 
@@ -101,6 +102,7 @@ public class AuthController {
         vo.setEmail(user.getEmail());
         vo.setStatus(user.getStatus());
         vo.setCreateTime(user.getCreateTime());
+        vo.setRole(user.getRole());
         return vo;
     }
 }

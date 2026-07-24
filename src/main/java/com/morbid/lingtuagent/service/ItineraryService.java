@@ -16,5 +16,9 @@ public interface ItineraryService extends IService<Itinerary> {
     List<ItineraryVO> listAllItinerary();
     IPage<ItineraryVO> pageItinerary(int pageNum, int pageSize, String keyword);
     List<ItineraryVO> listByUserId(Long userId);  // 按用户查行程
-    List<ItineraryVO> listByCityId(Long cityId);  // 按城市查行程
+    List<ItineraryVO> listByCityId(Long cityId);
+
+    List<ItineraryVO> listDeleted();
+    void restore(Long id);
+    void physicalDelete(Long id);
 }

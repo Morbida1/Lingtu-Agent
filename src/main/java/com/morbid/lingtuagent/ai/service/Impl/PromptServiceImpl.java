@@ -6,9 +6,12 @@ import com.morbid.lingtuagent.ai.mapper.PromptTemplateMapper;
 import com.morbid.lingtuagent.ai.model.entity.PromptTemplate;
 import com.morbid.lingtuagent.ai.service.PromptService;
 import com.morbid.lingtuagent.ai.util.PromptRenderer;
+import com.morbid.lingtuagent.common.ResultCode;
+import com.morbid.lingtuagent.common.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -34,12 +37,15 @@ public class PromptServiceImpl extends ServiceImpl<PromptTemplateMapper, PromptT
 
     @Override
     public PromptTemplate create(PromptTemplate template) {
+        template.setCreatedAt(LocalDateTime.now());
+        template.setUpdatedAt(LocalDateTime.now());
         this.save(template);
         return template;
     }
 
     @Override
     public PromptTemplate update(PromptTemplate template) {
+        template.setUpdatedAt(LocalDateTime.now());
         this.updateById(template);
         return template;
     }
@@ -53,7 +59,7 @@ public class PromptServiceImpl extends ServiceImpl<PromptTemplateMapper, PromptT
     public String renderPrompt(String category, Map<String, String> variables) {
         PromptTemplate template = getByCategory(category);
         if (template == null) {
-            throw new RuntimeException("未找到分类为 " + category + " 的 Prompt 模板");
+            throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "未找到分类为 " + category + " 的 Prompt 模板");
         }
         return promptRenderer.render(template.getTemplate(), variables);
     }

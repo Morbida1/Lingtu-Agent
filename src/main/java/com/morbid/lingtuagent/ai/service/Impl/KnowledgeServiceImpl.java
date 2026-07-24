@@ -1,6 +1,8 @@
 package com.morbid.lingtuagent.ai.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.morbid.lingtuagent.ai.mapper.KnowledgeDocMapper;
 import com.morbid.lingtuagent.ai.model.entity.KnowledgeDoc;
@@ -8,6 +10,8 @@ import com.morbid.lingtuagent.ai.model.vo.KnowledgeDocVO;
 import com.morbid.lingtuagent.ai.service.KnowledgeService;
 import com.morbid.lingtuagent.ai.util.DocParser;
 import com.morbid.lingtuagent.ai.util.TextChunker;
+import com.morbid.lingtuagent.common.ResultCode;
+import com.morbid.lingtuagent.common.exception.BusinessException;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.chat.ChatModel;
@@ -100,6 +104,20 @@ public class KnowledgeServiceImpl extends ServiceImpl<KnowledgeDocMapper, Knowle
     }
 
     @Override
+    public KnowledgeDocVO getDoc(Long userId, Long docId) {
+        KnowledgeDoc doc = this.getById(docId);
+        if (doc == null) {
+            throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "文档不存在");
+        }
+        if (!doc.getUserId().equals(userId)) {
+            throw new BusinessException(ResultCode.FORBIDDEN.getCode(), "无权查看该文档");
+        }
+        KnowledgeDocVO vo = new KnowledgeDocVO();
+        BeanUtils.copyProperties(doc, vo);
+        return vo;
+    }
+
+    @Override
     public String queryKnowledge(Long userId, String question) {
         Embedding questionEmbedding = embeddingModel.embed(question).content();
 
@@ -136,6 +154,51 @@ public class KnowledgeServiceImpl extends ServiceImpl<KnowledgeDocMapper, Knowle
 
     @Override
     public void deleteDoc(Long userId, Long docId) {
+        KnowledgeDoc doc = this.getById(docId);
+        if (doc == null) {
+            throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "文档不存在");
+        }
+        if (!doc.getUserId().equals(userId)) {
+            throw new BusinessException(ResultCode.FORBIDDEN.getCode(), "无权删除该文档");
+        }
+        this.removeById(docId);
+    }
+
+    @Override
+    public IPage<KnowledgeDocVO> pageAllDocs(int pageNum, int pageSize, String keyword) {
+        LambdaQueryWrapper<KnowledgeDoc> wrapper = new LambdaQueryWrapper<>();
+        if (keyword != null && !keyword.isBlank()) {
+            wrapper.like(KnowledgeDoc::getTitle, keyword);
+        }
+        wrapper.orderByDesc(KnowledgeDoc::getCreateTime);
+
+        Page<KnowledgeDoc> page = new Page<>(pageNum, pageSize);
+        IPage<KnowledgeDoc> docPage = this.page(page, wrapper);
+
+        return docPage.convert(doc -> {
+            KnowledgeDocVO vo = new KnowledgeDocVO();
+            BeanUtils.copyProperties(doc, vo);
+            return vo;
+        });
+    }
+
+    @Override
+    public KnowledgeDocVO getDocById(Long docId) {
+        KnowledgeDoc doc = this.getById(docId);
+        if (doc == null) {
+            throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "文档不存在");
+        }
+        KnowledgeDocVO vo = new KnowledgeDocVO();
+        BeanUtils.copyProperties(doc, vo);
+        return vo;
+    }
+
+    @Override
+    public void deleteDocById(Long docId) {
+        KnowledgeDoc doc = this.getById(docId);
+        if (doc == null) {
+            throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "文档不存在");
+        }
         this.removeById(docId);
     }
 

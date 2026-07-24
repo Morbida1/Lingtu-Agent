@@ -1,6 +1,7 @@
 package com.morbid.lingtuagent.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -17,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,9 +56,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public void deleteUser(Long id) {
-        if (!this.removeById(id)) {
+        User user = this.getById(id);
+        if (user == null) {
             throw new BusinessException("用户不存在");
         }
+        LambdaUpdateWrapper<User> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(User::getId, id)
+               .set(User::getDeleted, 1)
+               .set(User::getDeleteTime, LocalDateTime.now());
+        this.update(wrapper);
     }
 
     @Override
@@ -100,5 +108,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         UserVO vo = new UserVO();
         BeanUtils.copyProperties(user, vo);
         return vo;
+    }
+
+    @Override
+    public List<UserVO> listDeleted() {
+        return baseMapper.selectDeleted().stream()
+                .map(this::convertToVO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void restore(Long id) {
+        if (baseMapper.restoreById(id) == 0) {
+            throw new BusinessException("恢复失败");
+        }
+    }
+
+    @Override
+    public void physicalDelete(Long id) {
+        if (baseMapper.physicalDeleteById(id) == 0) {
+            throw new BusinessException("物理删除失败，数据不存在");
+        }
     }
 }
